@@ -1,8 +1,5 @@
 package at.mrtramoga.moviebuddy;
 
-/**
- * Created by chris_000 on 11.05.2017.
- */
 public class Movie {
 
     private final String mTitle;

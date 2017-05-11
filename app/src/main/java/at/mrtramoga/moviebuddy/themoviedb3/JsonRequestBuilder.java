@@ -41,7 +41,7 @@ public class JsonRequestBuilder<T> {
         return this;
     }
 
-    public JsonRequestBuilder<T> setErrorListener(Response.ErrorListener errorListener) {
+    public JsonRequestBuilder<T> setErrorListener(@Nullable Response.ErrorListener errorListener) {
         this.errorListener = errorListener;
         return this;
     }

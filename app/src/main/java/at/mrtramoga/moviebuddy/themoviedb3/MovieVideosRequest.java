@@ -2,9 +2,6 @@ package at.mrtramoga.moviebuddy.themoviedb3;
 
 import com.android.volley.Response;
 
-/**
- * Created by chris_000 on 25.07.2016.
- */
 public class MovieVideosRequest extends MovieDbRequest<MovieVideosAnswer> {
 
     private static final String MOVIE_PATH = "/movie";

@@ -2,9 +2,6 @@ package at.mrtramoga.moviebuddy.themoviedb3;
 
 import java.util.List;
 
-/**
- * Created by chris_000 on 25.07.2016.
- */
 public class MovieReviewsAnswer {
 
     public static class Review {
