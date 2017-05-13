@@ -15,8 +15,15 @@ public class DiscoverMovieRequest extends MovieDbRequest<DiscoverMovieAnswer> {
     public static final int PAGE_PARAM_MAX = 1000;
     public static final int PAGE_PARAM_MIN = 1;
 
+    protected static final String GENRE_PARAM_KEY = "with_genres";
+
     public DiscoverMovieRequest(String apiKey, Response.Listener<DiscoverMovieAnswer> listener) {
         super(apiKey, DISCOVER_MOVIE_PATH, DiscoverMovieAnswer.class, listener);
+    }
+
+    public DiscoverMovieRequest setGenre(Genre genre) {
+        getBuilder().putParameter(GENRE_PARAM_KEY, Long.toString(genre.getId()));
+        return this;
     }
 
     public DiscoverMovieRequest setDiscoverOption(DiscoverOption discoverOption, SortOption sortOption) {

@@ -1,6 +1,6 @@
 package at.mrtramoga.moviebuddy;
 
-import android.app.Service;
+import android.animation.Animator;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -24,20 +24,28 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.HashMap;
+import junit.framework.Assert;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
+import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements MovieStore.InitializedListener{
+import at.mrtramoga.moviebuddy.themoviedb3.Genre;
+
+public class MainActivity extends AppCompatActivity implements MovieStore.Listener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String MOVIE_ID_KEY = "MOVIE_ID_KEY";
-    private static final String NUMBER_OF_SEEN_MOVIES_KEY = "NUMBER_OF_SEEN_MOVIES_KEY";
+    //private static final String SEEN_MOVIES_KEY =
     private static final int SPEECH_REQUEST_CODE = 0;
     private static final String DEBUG_TAG = "Gestures";
 
-    private int mMovieId;
-    private int mNumberOfSeenMovies;
+    private Set<String> mSeenMovies = new HashSet<>();;
+    private String mCurrentMovie;
     private List<Movie> mMovies;
     private ImageView mPoster;
     private TextView mTitle;
@@ -57,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements MovieStore.Initia
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        NetworkUtils.initialize(this);
+        MovieStore.initialize(getString(R.string.the_movie_db_api_key), NetworkUtils.getInstance(), this);
 
         // Grep all views
         mPoster = (ImageView) findViewById(R.id.poster);
@@ -83,85 +94,135 @@ public class MainActivity extends AppCompatActivity implements MovieStore.Initia
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(MOVIE_ID_KEY, mMovieId);
-        outState.putInt(NUMBER_OF_SEEN_MOVIES_KEY, mNumberOfSeenMovies);
+        outState.putString("mCurrentMovie", mCurrentMovie);
+        outState.putStringArray("mSeenMovies", mSeenMovies.toArray(new String[mSeenMovies.size()]));
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        mMovieId = savedInstanceState.getInt(MOVIE_ID_KEY, 0);
-        mNumberOfSeenMovies = savedInstanceState.getInt(NUMBER_OF_SEEN_MOVIES_KEY, 0);
+        mCurrentMovie = savedInstanceState.getString("mCurrentMovie");
+
+        final String[] seenMovies = savedInstanceState.getStringArray("mSeenMovies");
+        if (seenMovies != null)
+            mSeenMovies = new HashSet<>(Arrays.asList(seenMovies));
+
+        loadCurrentMove();
     }
 
-    private void loadCurrentMovie() {
-        final Movie movie = mMovies.get(mMovieId);
-
+    private void load(Movie movie) {
         mTitle.setText(movie.title());
         mDescription.setText(movie.description());
-        Picasso.with(this).load(movie.posterUrl()).into(mPoster);
+        Picasso.with(this).load(movie.posterUrl()).into(mPoster, new com.squareup.picasso.Callback() {
+            @Override
+            public void onSuccess() {
+                mTitle.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .setListener(null);
+
+                mDescription.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .setListener(null);
+
+                mPoster.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .setListener(null);
+            }
+
+            @Override
+            public void onError() {
+                mToastManager.show(R.string.poster_load_error);
+            }
+        });
 
         mIsLoading = false;
     }
 
+    private void loadCurrentMove() {
+        Movie movie = null;
+
+        for (Movie m : mMovies)
+            if (m.title().equals(mCurrentMovie))
+                movie = m;
+
+        if (movie != null)
+            load(movie);
+    }
+
     private void fadeNewMovieIn() {
+        ArrayList<Integer> indices = new ArrayList<>(mMovies.size());
+        for (int i = 0; i < mMovies.size(); i++)
+            indices.add(i);
+
         Movie movie;
         do {
-            mMovieId = (int) (Math.random() * mMovies.size());
+            if (indices.isEmpty()) {
+                mToastManager.show(R.string.no_more_movies, true);
+                return;
+            }
 
-            movie = mMovies.get(mMovieId);
-        } while (movie.isSeen());
+            int index = (int) (Math.random() * indices.size());
+            int id = indices.get(index);
+            indices.remove(index);
 
-        movie.markSeen();
-        mNumberOfSeenMovies++;
+            movie = mMovies.get(id);
+        } while (mSeenMovies.contains(movie.title()));
 
-        loadCurrentMovie();
+        mCurrentMovie = movie.title();
+        mSeenMovies.add(mCurrentMovie);
+
+        load(movie);
     }
 
     private void loadNewMovie() {
         if (mMovies == null || mIsLoading)
             return;
 
-        if (mNumberOfSeenMovies == mMovies.size()) {
-            mToastManager.show(R.string.no_more_movies, true);
-            return;
-        }
-
         mIsLoading = true;
 
-        TranslateAnimation animation = new TranslateAnimation(0, -1000, 0, -200);
-        animation.setDuration(500);
-        animation.setFillAfter(false);
-        animation.setInterpolator(new AccelerateInterpolator((float)1.5));
+        mTitle.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .setListener(null);
 
-        animation.setAnimationListener(new Animation.AnimationListener() {
+        mDescription.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .setListener(null);
+
+        mPoster.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .setListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
+            public void onAnimationStart(Animator animator) {
 
             }
 
             @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd(Animator animator) {
                 fadeNewMovieIn();
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
 
             }
         });
-
-        mPoster.startAnimation(animation);
-        mTitle.startAnimation(animation);
-        mDescription.startAnimation(animation);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        MovieStore.get().initialize(this, getString(R.string.the_movie_db_api_key), this);
 
         mShakeDetector.setOnShakeListener(new ShakeDetector.OnShakeListener() {
             @Override
@@ -191,16 +252,14 @@ public class MainActivity extends AppCompatActivity implements MovieStore.Initia
         super.onPause();
     }
 
-
     @Override
-    public void onInitialized(boolean newDataLoaded) {
-        mMovies = MovieStore.get().getMovies();
+    public void onMoviesLoaded(boolean newDataLoaded) {
+        mMovies = MovieStore.getInstance().getMovies();
 
-        if (newDataLoaded) {
+        if (newDataLoaded)
             loadNewMovie();
-        } else if (mMovies != null) {
-            loadCurrentMovie();
-        }
+        else if (mMovies != null && mCurrentMovie != null)
+            loadCurrentMove();
     }
 
     // Create an intent that can start the Speech Recognizer activity
@@ -243,22 +302,44 @@ public class MainActivity extends AppCompatActivity implements MovieStore.Initia
     }
 
     private void processCommand(List<String> commands) {
-        int i = 0;
-        for (String command : commands) {
-            switch (command.toLowerCase()) {
-                case "next":
-                case "next film":
-                    fadeNewMovieIn();
-                    break;
-                default:
-                    i++;
-                    break;
-            }
-        }
+        boolean gotResult = false;
 
-        if (i == commands.size()) {
+        for (String command : commands) {
+            List<String> words = Arrays.asList(command.toLowerCase().split("\\s+"));
+
+            Iterator<String> it = words.iterator();
+
+            while (it.hasNext() && !gotResult) {
+                if ("next".equals(it.next())) {
+                    if (it.hasNext()) {
+                        String second = it.next();
+                        if (second.equals("movie")) {
+                            fadeNewMovieIn();
+                            gotResult = true;
+                        } else {
+                            List<Genre> genres = MovieStore.getInstance().getGenres();
+
+                            String last = null;
+                            if (it.hasNext())
+                                last = it.next();
+
+                            for (Genre genre : genres) {
+                                if (second.equals(genre.getName().toLowerCase()) && "movie".equals(last)) {
+                                    MovieStore.getInstance().loadMovies(genre, this);
+                                    gotResult = true;
+                                }
+                            }
+                        }
+                    } else {
+                        fadeNewMovieIn();
+                        gotResult = true;
+                    }
+                }
+            }
+         }
+
+        if (!gotResult)
             talk("Sorry i didn't get that");
-        }
     }
 
     @Override

@@ -4,21 +4,6 @@ import java.util.List;
 
 public class ExtendedMovieInformation implements MovieInformation {
 
-    public static class Genre {
-
-        private long id;
-
-        private String name;
-
-        public long getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
     public static class ProductionCompany {
 
         private long id;

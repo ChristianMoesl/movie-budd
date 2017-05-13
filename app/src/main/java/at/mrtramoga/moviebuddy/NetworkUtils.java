@@ -24,7 +24,7 @@ public class NetworkUtils {
         requestQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 
-    public static NetworkUtils getInstance(Context context) {
+    public static void initialize(Context context) {
         if (instance == null) {
             synchronized (NetworkUtils.class) {
                 if (instance == null) {
@@ -32,6 +32,9 @@ public class NetworkUtils {
                 }
             }
         }
+    }
+
+    public static NetworkUtils getInstance() {
         return instance;
     }
 

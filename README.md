@@ -9,21 +9,30 @@ The entry should look like this:
 <string name="the_movie_db_api_key">YOUR_KEY</string>
 ```
 
+## Layout
+The app is optimized for portrait and landscape mode.
+
+![Portrait](./doc/portrait.png) 
+![Landscape](./doc/landscape.png)
+
 ## How it works
 The app will start with an movie recommendation already in place. If u want to get another movie recommendation, u have three ways to achieve that.
 
-![Usage](./doc/get-next.gif)
+### Shake the phone
+Shake the phone to get a new recommendation
 
 ### Swipe
 Swipe on the screen to get the next video.
 
-### Shake the phone
-
+![Swipe](./doc/swipe.gif)
 
 ### Speech recognition
 Press the yellow FAB-Button on the right bottom corner and use one of the following commands:
 + "next"
-+ "next film"
++ "next movie"
++ "next ``<genre>`` movie"
+
+![Speech recognition](./doc/speech-recognition.gif)
 
 ## License
 
