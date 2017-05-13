@@ -12,19 +12,13 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-
-import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Scanner;
 import java.util.Set;
 
 import at.mrtramoga.moviebuddy.themoviedb3.Genre;
@@ -40,9 +33,7 @@ import at.mrtramoga.moviebuddy.themoviedb3.Genre;
 public class MainActivity extends AppCompatActivity implements MovieStore.Listener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    //private static final String SEEN_MOVIES_KEY =
     private static final int SPEECH_REQUEST_CODE = 0;
-    private static final String DEBUG_TAG = "Gestures";
 
     private Set<String> mSeenMovies = new HashSet<>();;
     private String mCurrentMovie;
