@@ -1,5 +1,5 @@
 # Movie Buddy
-A simple app for movie recommendations. It will fetch popular movies from [The Movie DB](https://www.themoviedb.org/) and recommends a random movie.
+A simple app for movie recommendations. It will fetch popular movies from [The Movie DB](https://www.themoviedb.org/) and recommends a (genre specific) random movie.
 
 ## Getting started
 
