@@ -1,4 +1,4 @@
-# Movie Buddy
+# Movie Buddy [![Build Status](https://travis-ci.org/ChristianMoesl/movie-buddy.svg?branch=master)](https://travis-ci.org/ChristianMoesl/movie-buddy)
 A simple app for movie recommendations. It will fetch popular movies from [The Movie DB](https://www.themoviedb.org/) and recommends a (genre specific) random movie.
 
 ## Getting started
